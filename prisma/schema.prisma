@@ -10,10 +10,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Threads {
+model Thread {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  threadId  String   @db.VarChar(255)
+  client    Client   @relation(fields: [clientId], references: [id])
+  clientId  Int
+}
+
+model Client {
   id          Int      @id @default(autoincrement())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  threadId    String   @db.VarChar(255)
+  name        String   @db.VarChar(255)
   assistantId String   @db.VarChar(255)
+  thread      Thread[]
 }

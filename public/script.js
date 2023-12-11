@@ -6,7 +6,8 @@ const sendChatBtn = document.querySelector(".chat-input span");
 
 let userMessage = null; // Variable to store user's message
 const inputInitHeight = chatInput.scrollHeight;
-const userId = Date.now().toString()
+const userId = Date.now().toString();
+const client = "client1";
 
 const createChatLi = (message, className) => {
     // Create a chat <li> element with passed message and className
@@ -31,6 +32,7 @@ const generateResponse = (chatElement) => {
         body: JSON.stringify({
             userId: userId,
             message: userMessage,
+            client: client,
         })
     }
 

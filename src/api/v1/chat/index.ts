@@ -7,9 +7,35 @@ const router = express.Router();
 let threadByUser = {};
 
 router.route('/').post(async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
-  const assistant = await loadOpenAIAssistant(process.env.OPENAI_API_KEY || "", process.env.OPENAI_ASSISTANT_ID || "")
   const openai = loadOpenAI(process.env.OPENAI_API_KEY);
   const userId = req.body.userId;
+  const clientName = req.body.client;
+
+  const client = await prisma.client.findFirst({
+    where: {
+      name: clientName,
+    }
+  }).catch((reason) => {
+    console.error(reason);
+  });
+
+  console.log("client", client)
+  if (client === null || typeof client === "undefined") {
+    res.status(404).json({ error: "No such client" });
+    return;
+  }
+
+  const assistant = await loadOpenAIAssistant(process.env.OPENAI_API_KEY || "", client.assistantId);
+  if (assistant.id !== client.assistantId) {
+    prisma.client.update({
+      where: {
+        id: client.id
+      },
+      data: {
+        assistantId: assistant.id
+      }
+    })
+  }
 
   if (!threadByUser[userId]) {
     try {
@@ -20,10 +46,10 @@ router.route('/').post(async (req: Request, res: Response, _next: NextFunction):
       });
       console.log("New thread was created by id: ", userId, "\n");
       threadByUser[userId] = myThread.id;
-      await prisma.threads.create({
+      await prisma.thread.create({
         data: {
-          assistantId: assistant.id,
           threadId: myThread.id,
+          clientId: client.id,
         }
       })
     } catch (error) {
