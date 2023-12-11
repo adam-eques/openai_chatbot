@@ -4,6 +4,8 @@ import { config } from 'dotenv';
 import express from 'express';
 import morgan from 'morgan';
 
+import api from './api';
+
 config();
 
 const app = express();
@@ -17,10 +19,15 @@ app.use(cookieParser());
 
 app.use(express.static('public'))
 
+const router = express.Router()
+router.use("/api", api)
+
+app.use('/', router);
+
 process.on("unhandledRejection", (err: Error) => {
   console.error(`Unhandled rejection: ${err}`, err.stack);
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is listening on port ${PORT}`);
+  console.log(`Server is listening on port: ${PORT}`);
 });
