@@ -1,2 +1,2 @@
-# openai_chatbot_backend
+# openai_chatbot
 Chatbot backend using OpenAI's assistant API
