@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient()
 async function main() {
   const testClient = await prisma.client.upsert({
-    where: { id: 0 },
+    where: { id: 1 },
     update: {},
     create: {
       name: "client1",

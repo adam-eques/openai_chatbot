@@ -19,6 +19,7 @@ app.use(cookieParser());
 
 app.use(express.static('public'))
 
+
 const router = express.Router()
 router.use("/api", api)
 

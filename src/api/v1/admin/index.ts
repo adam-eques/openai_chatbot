@@ -1,23 +1,14 @@
-import express, { NextFunction, Request, Response } from 'express';
-import { loadOpenAIAssistant, prisma } from '../../../utils';
+import express from 'express';
+import clientApi from "./client";
+import fileApi from "./file";
+import instructionApi from "./instruction";
+import uploadApi from "./upload";
 
 const router = express.Router();
 
-router.route('/files').get(async (_req: Request, res: Response, _next: NextFunction): Promise<any> => {
-  let assistant = await loadOpenAIAssistant(process.env.OPENAI_API_KEY || "", process.env.OPENAI_ASSISTANT_ID || "")
-  assistant.file_ids
-  const threadIds = (await prisma.thread.findMany()).map((value) => {
-    return {
-      createdAt: value.createdAt,
-      updatedAt: value.updatedAt,
-      threadId: value.threadId,
-    }
-  })
-  res.send({
-    assistantId: assistant.id,
-    threadIds: threadIds,
-  })
-  // res.send("Chatbot OpenAI related Api v1");
-})
+router.use("/instruction", instructionApi);
+router.use("/upload", uploadApi);
+router.use("/file", fileApi);
+router.use("/client", clientApi);
 
 export default router;
