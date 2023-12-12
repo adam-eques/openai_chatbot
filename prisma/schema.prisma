@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Thread {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  threadId  String   @db.VarChar(255)
+  client    Client   @relation(fields: [clientId], references: [id])
+  clientId  Int
+}
+
+model Client {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name        String   @db.VarChar(255)
+  assistantId String   @db.VarChar(255)
+  thread      Thread[]
+  File        File[]
+}
+
+model File {
+  id           Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  originalName String   @db.VarChar(255)
+  uploadedPath String   @db.VarChar(255)
+  openaiFileId String   @db.VarChar(255)
+  size         Int
+  client       Client   @relation(fields: [clientId], references: [id])
+  clientId     Int
+}
