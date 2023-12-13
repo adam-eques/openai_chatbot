@@ -1,4 +1,5 @@
 import express, { NextFunction, Request, Response } from 'express';
+import { checkClientBody, checkUserIdBody } from '../../../middleware/checkParam';
 import { loadOpenAI, loadOpenAIAssistant, prisma } from '../../../utils';
 
 const router = express.Router();
@@ -6,39 +7,37 @@ const router = express.Router();
 // To store chat sessions
 let threadByUser = {};
 
-router.route('/').post(async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
-  const openai = loadOpenAI(process.env.OPENAI_API_KEY);
-  const userId = req.body.userId;
-  const clientName = req.body.client;
+router.route('/').post(checkClientBody, checkUserIdBody, async (req: Request, res: Response, _next: NextFunction) => {
+  try {
+    const openai = loadOpenAI(process.env.OPENAI_API_KEY);
+    const userId = req.body.userId;
+    const clientName = req.body.client;
 
-  const client = await prisma.client.findFirst({
-    where: {
-      name: clientName,
-    }
-  }).catch((reason) => {
-    console.error(reason);
-  });
-
-  console.log("client", client)
-  if (client === null || typeof client === "undefined") {
-    res.status(404).json({ error: "No such client" });
-    return;
-  }
-
-  const assistant = await loadOpenAIAssistant(process.env.OPENAI_API_KEY || "", client.assistantId);
-  if (assistant.id !== client.assistantId) {
-    prisma.client.update({
+    const client = await prisma.client.findFirst({
       where: {
-        id: client.id
-      },
-      data: {
-        assistantId: assistant.id
+        name: clientName,
       }
     })
-  }
 
-  if (!threadByUser[userId]) {
-    try {
+    console.log("client", client)
+    if (client === null || typeof client === "undefined") {
+      res.status(404).json({ error: "No such client" });
+      return;
+    }
+
+    const assistant = await loadOpenAIAssistant(process.env.OPENAI_API_KEY || "", client.assistantId);
+    if (assistant.id !== client.assistantId) {
+      prisma.client.update({
+        where: {
+          id: client.id
+        },
+        data: {
+          assistantId: assistant.id
+        }
+      })
+    }
+
+    if (!threadByUser[userId]) {
       const myThread = await openai.beta.threads.create({
         metadata: {
           assistantId: assistant.id,
@@ -52,16 +51,10 @@ router.route('/').post(async (req: Request, res: Response, _next: NextFunction):
           clientId: client.id,
         }
       })
-    } catch (error) {
-      console.error("Error creating thread", error)
-      res.status(500).json({ error: "Internal server error" });
-      return;
     }
-  }
-  const userMessage = req.body.message;
+    const userMessage = req.body.message;
 
-  // Add a message to the thread
-  try {
+    // Add a message to the thread
     const myThreadMessage = await openai.beta.threads.messages.create(
       threadByUser[userId],
       {
@@ -129,9 +122,8 @@ router.route('/').post(async (req: Request, res: Response, _next: NextFunction):
     waitForAssistantMessage();
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json();
   }
-  return;
 })
 
 export default router;

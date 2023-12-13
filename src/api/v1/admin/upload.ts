@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express';
 import fs from 'fs';
 import multer from 'multer';
+import { checkClientBody } from '../../../middleware/checkParam';
 import { loadOpenAI, loadOpenAIAssistant, prisma } from '../../../utils';
 
 const router = express.Router();
@@ -44,7 +45,7 @@ const upload = multer({
   })
 })
 
-router.route('/').post(upload.any(), async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+router.route('/').post(upload.any(), checkClientBody, async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
   const uploadedInfo = req.files[0];
   const clientName = req.body.client
   console.log(uploadedInfo);
@@ -55,6 +56,8 @@ router.route('/').post(upload.any(), async (req: Request, res: Response, _next: 
       }
     }).catch((reason) => {
       console.error(reason);
+      res.status(404).json({ error: "No such client" });
+      return;
     });
 
     if (client === null || typeof client === "undefined") {
@@ -89,14 +92,27 @@ router.route('/').post(upload.any(), async (req: Request, res: Response, _next: 
         }
       })
 
+      const files = await prisma.client.findFirst({
+        where: {
+          name: clientName,
+        }
+      }).File()
+
+      const tmp = files.map((value) => {
+        return {
+          id: value.id,
+          createdAt: value.createdAt,
+          originalName: value.originalName,
+          uploadedPath: value.uploadedPath,
+          openaiFileId: value.openaiFileId,
+          size: value.size,
+        }
+      })
       res.send({
         success: true,
-        message: "uploaded successfully",
-        totalFileNum: file_ids.length + 1,
-        originalName: uploadedInfo.originalname,
-        uploadedPath: uploadedInfo.path,
-        size: uploadedInfo.size,
-        id: dbsaved.id,
+        client: clientName,
+        files: tmp,
+        uploadedId: dbsaved.id,
       })
       return;
     } catch (error) {
