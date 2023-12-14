@@ -1,12 +1,12 @@
 import express, { NextFunction, Request, Response } from 'express';
+import { checkClientBody, checkClientQuery } from '../../../middleware/checkParam';
 import { loadOpenAI, loadOpenAIAssistant, prisma } from '../../../utils';
 
 const router = express.Router();
 
-router.route('/all').get(async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
-  const clientName = req.body.client
-
+router.route('/all').get(checkClientQuery, async (req: Request, res: Response, _next: NextFunction) => {
   try {
+    const clientName = req.query.client as string
     const files = await prisma.client.findFirst({
       where: {
         name: clientName,
@@ -34,7 +34,7 @@ router.route('/all').get(async (req: Request, res: Response, _next: NextFunction
   }
 })
 
-router.delete('/all', async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+router.route('/all').delete(checkClientBody, async (req: Request, res: Response, _next: NextFunction) => {
   try {
     const clientName = req.body.client;
     const client = await prisma.client.findFirst({
@@ -75,7 +75,8 @@ router.delete('/all', async (req: Request, res: Response, _next: NextFunction): 
 })
 
 
-router.delete('/:id', async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+router.delete('/:id', checkClientBody, async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+
   try {
     const clientName = req.body.client;
     const fileId = req.params.id
@@ -83,9 +84,7 @@ router.delete('/:id', async (req: Request, res: Response, _next: NextFunction): 
       where: {
         name: clientName,
       }
-    }).catch((reason) => {
-      console.error(reason);
-    });
+    })
 
     if (client === null || typeof client === "undefined") {
       res.status(404).json({ error: "No such client" });
@@ -94,7 +93,7 @@ router.delete('/:id', async (req: Request, res: Response, _next: NextFunction): 
 
     const deletedInfo = await prisma.file.delete({
       where: {
-        id: Number(req.params.id)
+        id: Number(fileId)
       }
     })
 

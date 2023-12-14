@@ -1,10 +1,11 @@
 import express, { NextFunction, Request, Response } from 'express';
+import { checkClientQuery } from '../../../middleware/checkParam';
 import { prisma } from '../../../utils';
 
 const router = express.Router();
 
-router.route('/').get(async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
-  const clientName = req.body.client
+router.route('/').get(checkClientQuery, async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+  const clientName = req.query.client as string
 
   try {
     const client = await prisma.client.findFirst({
