@@ -20,7 +20,7 @@ const createChatLi = (message, className) => {
     return chatLi; // return chat <li> element
 }
 
-const generateResponse = (chatElement) => {
+const generateResponse = (chatElement, outgoingChatLi) => {
     const messageElement = chatElement.querySelector("p");
 
     // Define the properties and message for the API request
@@ -42,7 +42,12 @@ const generateResponse = (chatElement) => {
     }).catch(() => {
         messageElement.classList.add("error");
         messageElement.textContent = "Oops! Something went wrong. Please try again.";
-    }).finally(() => chatbox.scrollTo(0, chatbox.scrollHeight));
+    }).finally(() => {
+        chatbox.scrollTo({
+            top: outgoingChatLi.offsetTop - chatbox.offsetTop,
+            behavior: 'smooth'
+        });
+    });
 }
 
 const handleChat = () => {
@@ -54,7 +59,8 @@ const handleChat = () => {
     chatInput.style.height = `${inputInitHeight}px`;
 
     // Append the user's message to the chatbox
-    chatbox.appendChild(createChatLi(userMessage, "outgoing"));
+    const outgoingChatLi = createChatLi(userMessage, "outgoing")
+    chatbox.appendChild(outgoingChatLi);
     chatbox.scrollTo(0, chatbox.scrollHeight);
     
     setTimeout(() => {
@@ -62,7 +68,7 @@ const handleChat = () => {
         const incomingChatLi = createChatLi("Thinking...", "incoming");
         chatbox.appendChild(incomingChatLi);
         chatbox.scrollTo(0, chatbox.scrollHeight);
-        generateResponse(incomingChatLi);
+        generateResponse(incomingChatLi, outgoingChatLi);
     }, 600);
 }
 
