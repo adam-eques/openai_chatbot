@@ -1,4 +1,5 @@
 import express, { NextFunction, Request, Response } from 'express';
+import fs from 'fs';
 import { checkClientBody, checkClientQuery } from '../../../middleware/checkParam';
 import { loadOpenAI, loadOpenAIAssistant, prisma } from '../../../utils';
 
@@ -63,6 +64,35 @@ router.route('/all').delete(checkClientBody, async (req: Request, res: Response,
         clientId: client.id,
       }
     })
+
+    res.send({
+      success: true,
+      client: clientName,
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(404).send({ error: "Failed to remove file" });
+  }
+})
+
+router.route('/all-files').delete(async (req: Request, res: Response, _next: NextFunction) => {
+  try {
+    const clientName = req.body.client;
+    const client = await prisma.client.findFirst({
+      where: {
+        name: clientName,
+      }
+    }).catch((reason) => {
+      console.error(reason);
+    });
+
+    if (client === null || typeof client === "undefined") {
+      res.status(404).json({ error: "No such client" });
+      return;
+    }
+
+    const openai = loadOpenAI(process.env.OPENAI_API_KEY);
+    fs.rmdirSync('./')
 
     res.send({
       success: true,
