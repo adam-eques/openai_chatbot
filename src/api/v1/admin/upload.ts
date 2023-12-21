@@ -9,10 +9,14 @@ const router = express.Router();
 const upload = multer({
   dest: './uploads',
   fileFilter: (req, file, cb) => {
+    console.log(file.mimetype)
     switch (file.mimetype) {
-      case "application/pdf":
-      case "text/plain":
-      case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+      case "application/pdf": // pdf
+      case "text/plain": // txt
+      case "application/vnd.openxmlformats-officedocument.wordprocessingml.document": // Word - docx
+      case "application/vnd.openxmlformats-officedocument.presentationml.presentation": // PPT - pptx
+      case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": // xlsx
+      case "text/csv": // csv
         cb(null, true)
         break;
       default:

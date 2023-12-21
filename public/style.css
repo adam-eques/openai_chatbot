@@ -124,6 +124,7 @@ header h2 {
   color: #fff;
   font-size: 0.95rem;
   background: #724ae8;
+  overflow-wrap: break-word;
 }
 .chatbox .incoming p {
   border-radius: 10px 10px 10px 0;

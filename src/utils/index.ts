@@ -18,7 +18,7 @@ export const loadOpenAIAssistant = async (openai_apikey: string, assistant_id: s
     let assistant = await openai.beta.assistants.create({
       name: "chatbot_beta",
       instructions: "",
-      tools: [{ type: "retrieval" }],
+      tools: [{ type: "retrieval" }, { type: "code_interpreter" }],
       model: "gpt-4-1106-preview",
     })
     return assistant

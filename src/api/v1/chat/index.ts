@@ -70,6 +70,7 @@ router.route('/').post(checkClientBody, checkUserIdBody, async (req: Request, re
         instructions: assistant.instructions, // Your instructions here
         tools: [
           { type: "retrieval" }, // Retrieval tool
+          { type: "code_interpreter" }, // Code interpreter tool
         ],
       }
     );
