@@ -1,5 +1,6 @@
-mkdir ../tmp
-mv ./dist-prod ../tmp/dist-prod
-mv ./node_modules ../tmp/node_modules
+rm -rf ../prod
+mkdir ../prod
+mv ./dist-prod ../prod/dist-prod
+mv ./node_modules ../prod/node_modules
 rm -rf .git
 rm -rf *
