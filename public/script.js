@@ -8,7 +8,7 @@ let userMessage = null; // Variable to store user's message
 const inputInitHeight = chatInput.scrollHeight;
 const userId = Date.now().toString();
 const client = "client1";
-const API_URL = "https://tempdev.angeloper.com/api/v1/chat";
+const API_URL = "https://chatbot.besterpsolution.com/api/v1/chat";
 
 const createChatLi = (message, className) => {
     // Create a chat <li> element with passed message and className
