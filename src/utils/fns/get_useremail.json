@@ -1,0 +1,16 @@
+{
+  "name": "get_useremail",
+  "description": "Get user's email base on the given user email",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "email": {
+        "type": "string",
+        "description": "User's email that is provided"
+      }
+    },
+    "required": [
+      "email"
+    ]
+  }
+}

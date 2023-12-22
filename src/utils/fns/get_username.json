@@ -1,0 +1,16 @@
+{
+  "name": "get_username",
+  "description": "Get username base on the given user name",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Username that is provided"
+      }
+    },
+    "required": [
+      "name"
+    ]
+  }
+}
