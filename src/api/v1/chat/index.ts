@@ -1,6 +1,8 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { checkClientBody, checkUserIdBody } from '../../../middleware/checkParam';
 import { loadOpenAI, loadOpenAIAssistant, prisma } from '../../../utils';
+import { callMockAPI } from '../../../utils/mockapi';
+import { wait } from '../../../utils/time';
 
 const router = express.Router();
 
@@ -26,6 +28,7 @@ router.route('/').post(checkClientBody, checkUserIdBody, async (req: Request, re
     }
 
     const assistant = await loadOpenAIAssistant(process.env.OPENAI_API_KEY || "", client.assistantId);
+    console.log(assistant)
     if (assistant.id !== client.assistantId) {
       prisma.client.update({
         where: {
@@ -68,10 +71,7 @@ router.route('/').post(checkClientBody, checkUserIdBody, async (req: Request, re
       {
         assistant_id: assistant.id,
         instructions: assistant.instructions, // Your instructions here
-        tools: [
-          { type: "retrieval" }, // Retrieval tool
-          { type: "code_interpreter" }, // Code interpreter tool
-        ],
+        tools: assistant.tools,
       }
     );
 
@@ -79,25 +79,93 @@ router.route('/').post(checkClientBody, checkUserIdBody, async (req: Request, re
 
     // Periodically retrieve the Run to check on its status
     const retrieveRun = async () => {
-      let keepRetrievingRun;
+      const run_id = myRun.id
+      const thread_id = threadByUser[userId]
 
-      while (myRun.status !== "completed") {
-        keepRetrievingRun = await openai.beta.threads.runs.retrieve(
-          threadByUser[userId], // Use the stored thread ID for this user
-          myRun.id
-        );
+      let flagFinish = false
 
-        console.log(`Run status: ${keepRetrievingRun.status}`);
+      let MAX_COUNT = 2 * 600 // 120s 
+      let TIME_DELAY = 100 // 100ms
+      let count = 0
 
-        if (keepRetrievingRun.status === "completed") {
-          console.log("\n");
-          break;
+      do {
+        console.log(`Loop: ${count}`)
+        const run_data = await openai.beta.threads.runs.retrieve(
+          thread_id, // Use the stored thread ID for this user
+          run_id,
+        )
+
+        const status = run_data.status
+
+        console.log(`Status: ${status} ${(new Date()).toLocaleTimeString()}`)
+
+        switch (status) {
+          case 'completed':
+            flagFinish = true
+            break;
+
+          case 'requires_action':
+            console.log('run-data', run_data)
+
+            const required_action = run_data.required_action
+            const required_tools = required_action.submit_tool_outputs.tool_calls
+
+            console.log('required-action', required_action)
+            console.log('required-tools', required_tools)
+
+            let tool_output_items = []
+
+            for (let rtool of required_tools) {
+
+              const function_name = rtool.function.name
+              const tool_args = JSON.parse(rtool.function.arguments)
+
+              console.log("-", function_name, tool_args)
+
+              let tool_output = callMockAPI(client.id, thread_id, function_name, tool_args)
+
+              tool_output_items.push({
+                tool_call_id: rtool.id,
+                output: JSON.stringify(tool_output)
+              })
+            }
+
+            console.log('tools-output', tool_output_items)
+
+            const ret_tool = await openai.beta.threads.runs.submitToolOutputs(
+              thread_id,
+              run_id,
+              {
+                tool_outputs: tool_output_items,
+              }
+            )
+
+            console.log('ret-tool', ret_tool)
+            break;
+          case 'expired':
+          case 'cancelled':
+          case 'failed':
+            flagFinish = true
+          default:
+            break;
         }
-      }
+
+        if (!flagFinish) {
+          count++
+          if (count >= MAX_COUNT) {
+            flagFinish = true
+          } else {
+            await wait(TIME_DELAY)
+          }
+        }
+
+      } while (!flagFinish)
     };
+
     // Retrieve the Messages added by the Assistant to the Thread
     const waitForAssistantMessage = async () => {
       await retrieveRun();
+      // await extractLeadInfo();
 
       const allMessages = await openai.beta.threads.messages.list(
         threadByUser[userId] // Use the stored thread ID for this user

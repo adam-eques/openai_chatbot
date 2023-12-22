@@ -1,11 +1,14 @@
 import express, { NextFunction, Request, Response } from 'express';
 
+import { checkExpired } from '../../middleware/checkParam/checkExpired';
 import adminApi from './admin';
 import chat from './chat';
 import modelApi from './model';
 import threads from './threads';
 
 const router = express.Router();
+
+router.use(checkExpired)
 
 router.route('/').get((_req: Request, res: Response, _next: NextFunction): any => {
   res.send("Chatbot Api v1");

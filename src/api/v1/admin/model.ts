@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { checkClientBody, checkClientQuery, checkModelBody } from '../../../middleware/checkParam';
-import { loadOpenAI, loadOpenAIAssistant, prisma } from '../../../utils';
+import { loadOpenAI, loadOpenAIAssistant, openaiAssistantTools, prisma } from '../../../utils';
 
 const router = express.Router();
 
@@ -59,6 +59,7 @@ router.route('/').post(checkClientBody, checkModelBody, async (req: Request, res
     const openai = loadOpenAI(process.env.OPENAI_API_KEY)
     const ares = await openai.beta.assistants.update(client.assistantId, {
       model: model,
+      tools: openaiAssistantTools
     })
 
     res.send({

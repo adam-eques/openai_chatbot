@@ -2,6 +2,7 @@
   "name": "openai_chatbot",
   "version": "1.0.0",
   "description": "Chatbot using OpenAI's assistant API. Built in Express, TS and html",
+  "license": "GPL-3.0",
   "main": "dist",
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
@@ -9,10 +10,12 @@
   "dependencies": {
     "@prisma/client": "5.7.0",
     "@types/bluebird": "^3.5.24",
+    "@types/cache-manager": "^4.0.6",
     "@types/multer": "^1.4.11",
     "axios": "^1.6.2",
     "bluebird": "^3.5.2",
     "body-parser": "^1.18.3",
+    "cache-manager": "^4.1.0",
     "compression": "^1.7.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.4",
@@ -39,15 +42,18 @@
     "@types/node": "^20.10.4",
     "awesome-typescript-loader": "^5.2.0",
     "concurrently": "^8.2.0",
+    "javascript-obfuscator": "^4.1.0",
     "mocha": "^5.2.0",
     "nodemon": "^3.0.1",
     "prisma": "^5.7.0",
+    "terser": "^5.26.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
     "typescript-eslint-parser": "^18.0.0"
   },
   "scripts": {
     "build": "npm run tsc",
+    "build-prod": "npm run tsc && npx javascript-obfuscator dist/ --output dist-prod/ && cp -r ./src/utils/fns dist-prod/utils/fns && rm -rvf dist",
     "tsc": "tsc -p tsconfig.json",
     "dev": "concurrently \"npx tsc --watch --pretty false\" \"nodemon --quiet dist/index.js\"",
     "test": "tsc && ./node_modules/.bin/mocha dist/**/*.spec.js",

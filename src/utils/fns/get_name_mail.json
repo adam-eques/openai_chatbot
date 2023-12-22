@@ -1,0 +1,18 @@
+{
+  "name": "get_name_mail",
+  "description": "Get user's name and email base on the given user's name and email",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "User's name that is provided"
+      },
+      "email": {
+        "type": "string",
+        "description": "User's email that is provided"
+      }
+    },
+    "required": []
+  }
+}
