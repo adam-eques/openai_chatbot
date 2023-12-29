@@ -2,12 +2,12 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
-import fs from 'fs';
 import morgan from 'morgan';
 import api from './api';
 import config from './config';
 import { AirtableValue } from './types';
-import { isExpired, prisma } from './utils';
+import { prisma } from './utils';
+import { insertRecords } from './utils/airtables';
 import { flushOldCache } from './utils/cache';
 
 dotenv.config();
@@ -43,30 +43,20 @@ setInterval(async () => {
 
     const clientIds = Object.keys(values)
     for (let idx = 0; idx < clientIds.length; idx++) {
-      const clientId = clientIds[idx];
-      const client = await prisma.client.findFirst({
-        where: {
-          id: Number(clientId),
-        }
-      })
-      const fields = values[clientId].map((value: AirtableValue) => {
-        const keys = Object.keys(value)
-        let ret = {}
-        keys.forEach((key) => {
-          ret[key] = value[key]
+      try {
+        const clientId = clientIds[idx];
+        const client = await prisma.client.findFirst({
+          where: {
+            id: Number(clientId),
+          }
         })
-        return ret
-      })
-      // await base.table(client.name).create(fields)
-    }
 
-    fs.appendFile('text.txt', JSON.stringify(values), (err) => {
-      if (err) {
-        console.error('Error appending to file:', err);
-        return;
+        const fields = values[clientId]
+        insertRecords(client.atbToken, client.atbBaseId, client.atbTableNM, fields)
+      } catch (error) {
+        console.error(error)
       }
-      console.log('Data appended to file successfully!');
-    })
+    }
   } catch (error) {
     console.error(error)
   }
