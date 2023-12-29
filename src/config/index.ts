@@ -3,7 +3,7 @@ const config = {
     "gpt-4-1106-preview",
     "gpt-3.5-turbo-1106",
   ],
-  MAX_TTL: 2 * 60 * 1000,
+  MAX_TTL: 10 * 60 * 1000,
   AIRTABLE_BASE: "appBTHW4e1DXYYFj9"
 }
 
