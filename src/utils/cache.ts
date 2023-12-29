@@ -55,7 +55,7 @@ export const flushOldCache = async (timeStd: number): Promise<Record<string, Air
       const { threadId, name, email, createdAt } = value
       ret[clientId] = [
         ...ret[clientId],
-        { threadId, name, email, createdAt }
+        { threadId, name, email, createdAt, chatHistory: `${process.env.BACKEND_API_URL}/v1/chathistory?threadId=${threadId}` }
       ]
     }
   })

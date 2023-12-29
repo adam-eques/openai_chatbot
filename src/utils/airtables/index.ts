@@ -41,6 +41,10 @@ export const createTable = (token: string, baseId: string, tableName: string) =>
           }
         },
         "type": "dateTime",
+      },
+      {
+        "name": "chatHistory",
+        "type": "url",
       }
     ],
     "name": tableName

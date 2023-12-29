@@ -4,7 +4,7 @@ const prisma = new PrismaClient()
 async function main() {
   const atbToken = "pat49tWyYSd5wejEM.8bf15fe554cce19b5a380718ae5d248c62140263fbf9fd8f9a3b0d3eacf0068d"
   const atbBaseId = "appBTHW4e1DXYYFj9"
-  const atbTableNM = "leadInfo"
+  const atbTableNM = "leadInfo_1"
   let atbTableId = "test"
   try {
     const res = await createTable(atbToken, atbBaseId, atbTableNM)
