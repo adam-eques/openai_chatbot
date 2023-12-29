@@ -25,6 +25,10 @@ model Client {
   updatedAt   DateTime @updatedAt
   name        String   @db.VarChar(255)
   assistantId String   @db.VarChar(255)
+  atbToken    String   @db.VarChar(255)
+  atbBaseId   String   @db.VarChar(255)
+  atbTableNM  String   @db.VarChar(255)
+  atbTableId  String   @db.VarChar(255)
   thread      Thread[]
   File        File[]
 }

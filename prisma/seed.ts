@@ -1,12 +1,31 @@
 import { PrismaClient } from '@prisma/client';
+import { createTable } from '../src/utils/airtables';
 const prisma = new PrismaClient()
 async function main() {
+  const atbToken = "pat49tWyYSd5wejEM.8bf15fe554cce19b5a380718ae5d248c62140263fbf9fd8f9a3b0d3eacf0068d"
+  const atbBaseId = "appBTHW4e1DXYYFj9"
+  const atbTableNM = "leadInfo"
+  let atbTableId = "test"
+  try {
+    const res = await createTable(atbToken, atbBaseId, atbTableNM)
+    atbTableId = res.data.id
+    console.log(res.data)
+  } catch (error) {
+    console.log(error?.response?.data)
+    console.log(error?.response)
+    console.error("Failed to insert test data")
+    return
+  }
   const testClient = await prisma.client.upsert({
     where: { id: 1 },
     update: {},
     create: {
       name: "client1",
       assistantId: "asst_gleK1Z1Tw3P8RU06X7Z5sBlB",
+      atbToken: atbToken,
+      atbBaseId: atbBaseId,
+      atbTableNM: atbTableNM,
+      atbTableId: atbTableId,
     }
   });
   console.log({ testClient })
