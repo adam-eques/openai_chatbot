@@ -32,14 +32,23 @@ const upload = multer({
       console.log(file);
       let ext = "";
       switch (file.mimetype) {
-        case "application/pdf":
+        case "application/pdf": // pdf
           ext = ".pdf";
           break;
-        case "text/plain":
+        case "text/plain": // txt
           ext = ".txt";
           break;
-        case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        case "application/vnd.openxmlformats-officedocument.wordprocessingml.document": // Word - docx
           ext = ".docx";
+          break;
+        case "application/vnd.openxmlformats-officedocument.presentationml.presentation": // PPT - pptx
+          ext = ".ppt";
+          break;
+        case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": // xlsx
+          ext = ".xlsx";
+          break;
+        case "text/csv": // csv
+          ext = ".csv";
           break;
         default:
           break;

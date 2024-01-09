@@ -20,6 +20,11 @@ const createChatLi = (message, className) => {
     return chatLi; // return chat <li> element
 }
 
+function convertURLsToLinks(text) {
+  var regex = /(https?:\/\/[^\s]+)/g;
+  return text.replace(regex, '<a href="$1" target="_blank">$1</a>');
+}
+
 const generateResponse = (chatElement, outgoingChatLi) => {
     const messageElement = chatElement.querySelector("p");
 
@@ -38,7 +43,7 @@ const generateResponse = (chatElement, outgoingChatLi) => {
 
     // Send POST request to API, get response and set the reponse as paragraph text
     fetch(API_URL, requestOptions).then(res => res.json()).then(data => {
-        messageElement.textContent = data.response;
+        messageElement.innerHTML = convertURLsToLinks(data.response); 
     }).catch(() => {
         messageElement.classList.add("error");
         messageElement.textContent = "Oops! Something went wrong. Please try again.";

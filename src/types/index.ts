@@ -11,5 +11,6 @@ export interface CacheValue extends ChatLeadInfo {
 }
 
 export interface AirtableValue extends ChatLeadInfo {
-  createdAt: Date
+  createdAt: Date,
+  chatHistory: string,
 }

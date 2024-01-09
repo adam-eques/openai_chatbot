@@ -1,7 +1,10 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { prisma } from '../../../utils';
+import messageRouter from './messages';
 
 const router = express.Router();
+
+router.use('/', messageRouter)
 
 router.route('/').get(async (req: Request, res: Response, _next: NextFunction) => {
   try {
